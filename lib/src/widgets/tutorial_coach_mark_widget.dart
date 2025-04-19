@@ -36,13 +36,13 @@ class TutorialCoachMarkWidget extends StatefulWidget {
     this.imageFilter,
     this.backgroundSemanticLabel,
     this.initialFocus = 0,
-  })  : assert(targets.length > 0),
-        super(key: key);
+  }) : assert(targets.length > 0),
+       super(key: key);
 
   final List<TargetFocus> targets;
   final FutureOr Function(TargetFocus)? clickTarget;
   final FutureOr Function(TargetFocus, TapDownDetails)?
-      onClickTargetWithTapPosition;
+  onClickTargetWithTapPosition;
   final FutureOr Function(TargetFocus)? clickOverlay;
   final void Function()? finish;
   final Color colorShadow;
@@ -102,8 +102,10 @@ class TutorialCoachMarkWidgetState extends State<TutorialCoachMarkWidget>
               return widget.clickTarget?.call(target);
             },
             clickTargetWithTapPosition: (target, tapDetails) {
-              return widget.onClickTargetWithTapPosition
-                  ?.call(target, tapDetails);
+              return widget.onClickTargetWithTapPosition?.call(
+                target,
+                tapDetails,
+              );
             },
             clickOverlay: (target) {
               return widget.clickOverlay?.call(target);
@@ -125,7 +127,7 @@ class TutorialCoachMarkWidgetState extends State<TutorialCoachMarkWidget>
             duration: const Duration(milliseconds: 300),
             child: _buildContents(),
           ),
-          _buildSkip()
+          _buildSkip(),
         ],
       ),
     );
@@ -169,9 +171,10 @@ class TutorialCoachMarkWidgetState extends State<TutorialCoachMarkWidget>
     double haloHeight;
 
     if (currentTarget!.shape == ShapeLightFocus.Circle) {
-      haloWidth = target.size.width > target.size.height
-          ? target.size.width
-          : target.size.height;
+      haloWidth =
+          target.size.width > target.size.height
+              ? target.size.width
+              : target.size.height;
       haloHeight = haloWidth;
     } else {
       haloWidth = target.size.width;
@@ -189,70 +192,70 @@ class TutorialCoachMarkWidgetState extends State<TutorialCoachMarkWidget>
 
     final ancestorBox = context.findRenderObject() as RenderBox;
 
-    children = currentTarget!.contents!.map<Widget>((i) {
-      switch (i.align) {
-        case ContentAlign.bottom:
-          {
-            width = ancestorBox.size.width;
-            left = 0;
-            top = positioned.dy + haloHeight;
-            bottom = null;
+    children =
+        currentTarget!.contents!.map<Widget>((i) {
+          switch (i.align) {
+            case ContentAlign.bottom:
+              {
+                width = ancestorBox.size.width;
+                left = 0;
+                top = positioned.dy + haloHeight;
+                bottom = null;
+              }
+              break;
+            case ContentAlign.top:
+              {
+                width = ancestorBox.size.width;
+                left = 0;
+                top = null;
+                bottom = haloHeight + (ancestorBox.size.height - positioned.dy);
+              }
+              break;
+            case ContentAlign.left:
+              {
+                width = positioned.dx - haloWidth;
+                left = 0;
+                top = positioned.dy - target!.size.height / 2 - haloHeight;
+                bottom = null;
+              }
+              break;
+            case ContentAlign.right:
+              {
+                left = positioned.dx + haloWidth;
+                top = positioned.dy - target!.size.height / 2 - haloHeight;
+                bottom = null;
+                width = ancestorBox.size.width - left!;
+              }
+              break;
+            case ContentAlign.custom:
+              {
+                left = i.customPosition!.left;
+                right = i.customPosition!.right;
+                top = i.customPosition!.top;
+                bottom = i.customPosition!.bottom;
+                width = ancestorBox.size.width;
+              }
+              break;
           }
-          break;
-        case ContentAlign.top:
-          {
-            width = ancestorBox.size.width;
-            left = 0;
-            top = null;
-            bottom = haloHeight + (ancestorBox.size.height - positioned.dy);
-          }
-          break;
-        case ContentAlign.left:
-          {
-            width = positioned.dx - haloWidth;
-            left = 0;
-            top = positioned.dy - target!.size.height / 2 - haloHeight;
-            bottom = null;
-          }
-          break;
-        case ContentAlign.right:
-          {
-            left = positioned.dx + haloWidth;
-            top = positioned.dy - target!.size.height / 2 - haloHeight;
-            bottom = null;
-            width = ancestorBox.size.width - left!;
-          }
-          break;
-        case ContentAlign.custom:
-          {
-            left = i.customPosition!.left;
-            right = i.customPosition!.right;
-            top = i.customPosition!.top;
-            bottom = i.customPosition!.bottom;
-            width = ancestorBox.size.width;
-          }
-          break;
-      }
 
-      return Positioned(
-        top: top,
-        bottom: bottom,
-        left: left,
-        right: right,
-        child: SizedBox(
-          width: width,
-          child: Padding(
-            padding: i.padding,
-            child: i.builder?.call(context, this) ??
-                (i.child ?? const SizedBox.shrink()),
-          ),
-        ),
-      );
-    }).toList();
+          return Positioned(
+            top: top,
+            bottom: bottom,
+            left: left,
+            right: right,
+            child: SizedBox(
+              width: width,
+              child: Padding(
+                padding: i.padding,
+                child:
+                    i.builder?.call(context, this) ??
+                    (i.child ?? const SizedBox.shrink()),
+              ),
+            ),
+          );
+        }).toList();
 
-    return Stack(
-      children: children,
-    );
+    return Stack(children: children);
   }
 
   Widget _buildSkip() {
@@ -281,20 +284,17 @@ class TutorialCoachMarkWidgetState extends State<TutorialCoachMarkWidget>
         child: AnimatedOpacity(
           opacity: showContent ? 1 : 0,
           duration: Durations.medium2,
-          child: widget.skipWidget ??
-              InkWell(
-                onTap: skip,
-                child: IgnorePointer(
-                  child: widget.skipWidget ??
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Text(
-                          widget.textSkip,
-                          style: widget.textStyleSkip,
-                        ),
-                      ),
-                ),
-              ),
+          child: InkWell(
+            onTap: skip,
+            child: IgnorePointer(
+              child:
+                  widget.skipWidget ??
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Text(widget.textSkip, style: widget.textStyleSkip),
+                  ),
+            ),
+          ),
         ),
       ),
     );
